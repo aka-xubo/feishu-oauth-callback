@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞书授权 - 授权码</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1f2937;
+            margin-bottom: 16px;
+            font-size: 28px;
+        }
+
+        .description {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .code-container {
+            background: #f3f4f6;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .code-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .code-value {
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 18px;
+            color: #1f2937;
+            word-break: break-all;
+            line-height: 1.6;
+            user-select: all;
+        }
+
+        .copy-button {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+        }
+
+        .copy-button:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .copy-button:active {
+            transform: translateY(0);
+        }
+
+        .copy-button.copied {
+            background: #10b981;
+        }
+
+        .instructions {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
+            border-radius: 4px;
+            margin-top: 24px;
+        }
+
+        .instructions-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: #1e40af;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .error {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 16px;
+            border-radius: 4px;
+            color: #991b1b;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .code-value {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✓</div>
+        <h1>授权成功！</h1>
+        <p class="description">
+            您已成功授权飞书任务管理应用。请复制下方的授权码并粘贴到终端中。
+        </p>
+
+        <div id="content"></div>
+    </div>
+
+    <script>
+        function getAuthCode() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('code');
+        }
+
+        function renderSuccess(code) {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="code-container">
+                    <div class="code-label">授权码 (Authorization Code)</div>
+                    <div class="code-value" id="code">${code}</div>
+                </div>
+
+                <button class="copy-button" onclick="copyCode()">
+                    <span id="button-text">📋 复制授权码</span>
+                </button>
+
+                <div class="instructions">
+                    <div class="instructions-title">📝 下一步操作：</div>
+                    <ol>
+                        <li>点击上方按钮复制授权码</li>
+                        <li>返回终端窗口</li>
+                        <li>将授权码粘贴到提示处</li>
+                        <li>按 Enter 键完成授权</li>
+                    </ol>
+                </div>
+            `;
+        }
+
+        function renderError(message) {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="error">
+                    <strong>❌ 错误：</strong> ${message}
+                </div>
+            `;
+        }
+
+        function copyCode() {
+            const code = document.getElementById('code').textContent;
+            const button = document.querySelector('.copy-button');
+            const buttonText = document.getElementById('button-text');
+
+            navigator.clipboard.writeText(code).then(() => {
+                button.classList.add('copied');
+                buttonText.textContent = '✓ 已复制！';
+
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                    buttonText.textContent = '📋 复制授权码';
+                }, 2000);
+            }).catch(err => {
+                alert('复制失败，请手动复制授权码');
+            });
+        }
+
+        // 初始化
+        const code = getAuthCode();
+        if (code) {
+            renderSuccess(code);
+        } else {
+            renderError('未找到授权码。请确保您是通过正确的授权链接访问此页面。');
+        }
+    </script>
+</body>
+</html>
